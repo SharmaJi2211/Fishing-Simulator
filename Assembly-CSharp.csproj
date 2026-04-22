@@ -65,8 +65,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\FishingState.cs" />
+    <Compile Include="Assets\Scripts\Input Handler.cs" />
     <Compile Include="Assets\Scripts\Events\GameEvents.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\ReelMechanic.cs" />
     <Compile Include="Assets\Scriptable Object\FishData.cs" />
     <Compile Include="Assets\Scripts\FishingManager.cs" />
   </ItemGroup>

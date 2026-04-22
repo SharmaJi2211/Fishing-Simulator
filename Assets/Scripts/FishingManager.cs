@@ -3,14 +3,16 @@ using UnityEngine;
 
 public class FishingManager : MonoBehaviour
 {
-    FishingState currentState;
-    FishData currentFish; // the fish we picked when player cast, used throughout Bite and Reeling
 
     [SerializeField] FishData[] fishPool; // array of all FishData assets
     [SerializeField] float minWaitTime = 2f;
     [SerializeField] float maxWaitTime = 6f;
     [SerializeField] float biteWindow  = 1.5f;
+    [SerializeField] float castDuration = 1f;
 
+    FishingState currentState;
+    FishData currentFish; // the fish we picked when player cast, used throughout Bite and Reeling
+    
 
     void Start()
     {
@@ -21,7 +23,7 @@ public class FishingManager : MonoBehaviour
     void SetState(FishingState newState)
     {
         currentState = newState;
-
+        Debug.Log("State changed to: " + currentState);
         switch (currentState)
         {
             // when we enter Idle fire the event to unlock player
@@ -32,6 +34,7 @@ public class FishingManager : MonoBehaviour
             // when we enter Casting fire the event to lock player
             case FishingState.Casting:
                 GameEvents.PlayerMoveToggled(false);
+                StartCoroutine(CastRoutine());
                 break;
 
             // When we enter waiting state wait for the fish to bite on
@@ -85,4 +88,61 @@ public class FishingManager : MonoBehaviour
         yield return new WaitForSeconds(2f);
         SetState(FishingState.Idle);
     }
+
+    IEnumerator CastRoutine()
+    {
+        yield return new WaitForSeconds(castDuration);
+        SetState(FishingState.Waiting);
+    }
+
+    // Chooses up a random fish from the pool to bite onto the bait
+    FishData PickFish()
+    {
+        int totalWeight = 0;
+
+        for(int i = 0; i < fishPool.Length; i++)
+        {
+            totalWeight += fishPool[i].spawnWeight;
+        }
+        int roll = Random.Range(0, totalWeight);
+        
+        for(int i = 0; i < fishPool.Length; i++)
+        {
+            if(roll < fishPool[i].spawnWeight)
+                return fishPool[i];  // this fish owns the roll
+            
+            roll -= fishPool[i].spawnWeight;  // not this fish, subtract and check next
+        }
+    
+        return fishPool[0];
+    }
+
+    // Works only when idle lets player cast the fishing rod
+    public void OnCastInput()
+    {
+        if (currentState == FishingState.Idle)
+            SetState(FishingState.Casting);
+    }
+
+    // Works only when fish bit on the bait prevents unnecessary clicks
+    public void OnClickInput()
+    {
+        if (currentState == FishingState.Bite)
+            SetState(FishingState.Reeling);
+    }
+
+    // Subscribing the event
+    void OnEnable()
+    {
+        GameEvents.OnCastInput += OnCastInput;
+        GameEvents.OnClickInput += OnClickInput;
+    }
+
+    // Unsubscribing the event
+    void OnDisable()
+    {
+        GameEvents.OnCastInput -= OnCastInput;
+        GameEvents.OnClickInput -= OnClickInput;
+    }
+    
 }

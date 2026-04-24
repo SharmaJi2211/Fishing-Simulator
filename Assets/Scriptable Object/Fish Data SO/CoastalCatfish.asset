@@ -16,7 +16,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   rarity: 2
   spawnWeight: 10
-  zoneWidth: 0.14
+  zoneWidth: 0.2
   fishSpeed: 1.8
   struggleInterval: 1.2
   catchFillRate: 0.12

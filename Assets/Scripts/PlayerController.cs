@@ -1,20 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] float movementSpeed = 5f;
     [SerializeField] float rotationSpeed = 10f;
+    [SerializeField] float gravity = -9.81f;
 
+    CharacterController controller;
     Camera mainCamera;
     bool canMove = true;
+    float verticalVelocity;
 
-    // Called via Event manager to lock/unlock Movement
     public void SetCanMove(bool value) => canMove = value;
 
     void Start()
     {
+        controller = GetComponent<CharacterController>();
         mainCamera = Camera.main;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -22,31 +23,45 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (!canMove) return;
+        // apply gravity
+        if (controller.isGrounded)
+            verticalVelocity = -2f;
+        else
+            verticalVelocity += gravity * Time.deltaTime;
 
-        // For the Movement
+        if (!canMove)
+        {
+            // apply gravity when fishing
+            controller.Move(new Vector3(0, verticalVelocity, 0) * Time.deltaTime);
+            return;
+        }
+
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
-        Vector3 moveDir = (transform.forward * v + transform.right * h).normalized;
+        Vector3 camForward = mainCamera.transform.forward;
+        Vector3 camRight   = mainCamera.transform.right;
+        camForward.y = 0f;
+        camRight.y   = 0f;
+        camForward.Normalize();
+        camRight.Normalize();
+
+        Vector3 moveDir = (camForward * v + camRight * h).normalized;
 
         if (moveDir.magnitude > 0.1f)
         {
-            // Smooth the Rotation of the Player
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(moveDir), rotationSpeed * Time.deltaTime);
-
-            // Moves the Player
-            transform.Translate(moveDir * movementSpeed * Time.deltaTime, Space.World);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                Quaternion.LookRotation(moveDir),
+                rotationSpeed * Time.deltaTime
+            );
         }
+
+        Vector3 velocity = moveDir * movementSpeed;
+        velocity.y = verticalVelocity;
+        controller.Move(velocity * Time.deltaTime);
     }
 
-    void OnEnable()
-    {
-        GameEvents.OnPlayerMoveToggled += SetCanMove;
-    }
-
-    void OnDisable()
-    {
-        GameEvents.OnPlayerMoveToggled -= SetCanMove;
-    }
+    void OnEnable()  => GameEvents.OnPlayerMoveToggled += SetCanMove;
+    void OnDisable() => GameEvents.OnPlayerMoveToggled -= SetCanMove;
 }

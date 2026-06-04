@@ -24,19 +24,6 @@ public class ReelMechanic : MonoBehaviour
 
     FishData currentFish;
 
-    void OnEnable()
-    {
-        GameEvents.OnReelStarted  += StartReel;
-        GameEvents.OnReelHoldDown += OnHoldDown;
-        GameEvents.OnReelHoldUp   += OnHoldUp;
-    }
-
-    void OnDisable()
-    {
-        GameEvents.OnReelStarted  -= StartReel;
-        GameEvents.OnReelHoldDown -= OnHoldDown;
-        GameEvents.OnReelHoldUp   -= OnHoldUp;
-    }
 
     void StartReel(FishData fish)
     {
@@ -109,5 +96,19 @@ public class ReelMechanic : MonoBehaviour
         holding = false;
         if (success) GameEvents.FishCaught(currentFish);
         else         GameEvents.FishEscaped();
+    }
+    
+    void OnEnable()
+    {
+        GameEvents.OnReelStarted  += StartReel;
+        GameEvents.OnReelHoldDown += OnHoldDown;
+        GameEvents.OnReelHoldUp   += OnHoldUp;
+    }
+
+    void OnDisable()
+    {
+        GameEvents.OnReelStarted  -= StartReel;
+        GameEvents.OnReelHoldDown -= OnHoldDown;
+        GameEvents.OnReelHoldUp   -= OnHoldUp;
     }
 }

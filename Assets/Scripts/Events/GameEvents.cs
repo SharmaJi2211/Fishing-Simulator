@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 
 public static class GameEvents
@@ -18,9 +19,11 @@ public static class GameEvents
     #endregion
 
     #region Input
+    // For LMB
     public static event Action OnCastInput;
     public static void CastInput() => OnCastInput?.Invoke();
 
+    // For Space 
     public static event Action OnReelHoldDown;
     public static void ReelHoldDown() => OnReelHoldDown?.Invoke();
 
@@ -69,5 +72,15 @@ public static class GameEvents
     #region UI Notifications
     public static event Action<string, Color> OnNotifyMessage;
     public static void NotifyMessage(string msg, Color color) => OnNotifyMessage?.Invoke(msg, color);
+    
+    #endregion
+
+    #region Input Handler
+
+    // For player movement
+    public static event Action<Vector2> OnMoveInput;
+    public static void MoveInput(Vector2 dir) => OnMoveInput?.Invoke(dir);
+
+
     #endregion
 }

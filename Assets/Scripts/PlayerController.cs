@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -29,15 +30,19 @@ public class PlayerController : MonoBehaviour
         else
             verticalVelocity += gravity * Time.deltaTime;
 
+    }
+
+    void HandleMovement(Vector2 dir)
+    {
         if (!canMove)
         {
             // apply gravity when fishing
             controller.Move(new Vector3(0, verticalVelocity, 0) * Time.deltaTime);
             return;
         }
-
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
+        
+        float h = dir.x;
+        float v = dir.y;
 
         Vector3 camForward = mainCamera.transform.forward;
         Vector3 camRight   = mainCamera.transform.right;
@@ -62,6 +67,14 @@ public class PlayerController : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
     }
 
-    void OnEnable()  => GameEvents.OnPlayerMoveToggled += SetCanMove;
-    void OnDisable() => GameEvents.OnPlayerMoveToggled -= SetCanMove;
+    void OnEnable() 
+    {
+        GameEvents.OnPlayerMoveToggled += SetCanMove;
+        GameEvents.OnMoveInput += HandleMovement;
+    }
+    void OnDisable()
+    {
+        GameEvents.OnPlayerMoveToggled -= SetCanMove;
+        GameEvents.OnMoveInput -= HandleMovement;
+    }        
 }
